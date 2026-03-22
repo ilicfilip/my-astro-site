@@ -20,9 +20,17 @@ jobs:
       - run: npm install
       - run: npm run build
 
+      - name: Create CF Pages project if needed
+        run: |
+          curl -sf -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"${{ github.event.repository.name }}","production_branch":"main"}' \
+            || true
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=${{ github.event.repository.name }} --create-project
+          command: pages deploy dist --project-name=${{ github.event.repository.name }}
