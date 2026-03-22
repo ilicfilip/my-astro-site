@@ -1,0 +1,28 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  author?: string;
+  categories?: string[];
+  tags?: string[];
+  heroImage?: string;
+}
+
+const { title, description, pubDate, updatedDate, author, categories = [], tags = [], heroImage } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article>
+    {heroImage && <img src={heroImage} alt={title} style="width:100%;max-height:400px;object-fit:cover;border-radius:6px;margin-bottom:1.5rem;" />}
+    <h1 style="margin-top:0;">{title}</h1>
+    <p style="color:#666;font-size:0.9rem;">
+      {pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      {author && <span> · {author}</span>}
+    </p>
+    <div class="content"><slot /></div>
+  </article>
+</BaseLayout>
