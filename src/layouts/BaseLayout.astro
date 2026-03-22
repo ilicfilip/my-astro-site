@@ -28,7 +28,7 @@ const sitePages = (await getCollection('pages', ({ data }) => !data.draft))
           <a href="/">Home</a>
           <a href="/blog/">Blog</a>
           {sitePages.map((page) => (
-            <a href={`/${page.id}/`}>{page.data.title}</a>
+            <a href={`/${page.id.replace(/\.md$/, "")}/`}>{page.data.title}</a>
           ))}
         </div>
       </nav>

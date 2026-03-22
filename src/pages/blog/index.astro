@@ -10,7 +10,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   <h1 style="margin-top:0;">Blog</h1>
   {posts.map((post) => (
     <article style="margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid #eee;">
-      <h2 style="margin-bottom:0.25rem;"><a href={`/blog/${post.id}/`}>{post.data.title}</a></h2>
+      <h2 style="margin-bottom:0.25rem;"><a href={`/blog/${post.id.replace(/\.md$/, "")}/`}>{post.data.title}</a></h2>
       <small style="color:#666;">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</small>
       {post.data.description && <p style="margin-top:0.5rem;color:#555;">{post.data.description}</p>}
     </article>
