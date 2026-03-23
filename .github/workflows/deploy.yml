@@ -21,12 +21,28 @@ jobs:
       - run: npm run build
 
       - name: Create CF Pages project if needed
+        id: cf-project
         run: |
-          curl -sf -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
+          # Try to create; if it already exists, just fetch it
+          RESULT=$(curl -sf -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"name":"${{ github.event.repository.name }}","production_branch":"main"}' \
-            || true
+            -d '{"name":"${{ github.event.repository.name }}","production_branch":"main"}' 2>/dev/null || true)
+
+          # Extract subdomain from create response
+          SUBDOMAIN=$(echo "$RESULT" | grep -o '"subdomain":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+          # If create didn't return a subdomain (project exists), fetch it
+          if [ -z "$SUBDOMAIN" ]; then
+            RESULT=$(curl -sf "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/${{ github.event.repository.name }}" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" 2>/dev/null || true)
+            SUBDOMAIN=$(echo "$RESULT" | grep -o '"subdomain":"[^"]*"' | head -1 | cut -d'"' -f4)
+          fi
+
+          if [ -n "$SUBDOMAIN" ]; then
+            echo "site_url=https://$SUBDOMAIN" >> "$GITHUB_OUTPUT"
+            echo "Resolved site URL: https://$SUBDOMAIN"
+          fi
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -34,3 +50,21 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=${{ github.event.repository.name }}
+
+      - name: Save site URL as deployment
+        if: steps.cf-project.outputs.site_url
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_URL: ${{ steps.cf-project.outputs.site_url }}
+        run: |
+          DEPLOY_ID=$(curl -sf -X POST "https://api.github.com/repos/${{ github.repository }}/deployments" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"ref\":\"main\",\"environment\":\"production\",\"auto_merge\":false,\"required_contexts\":[]}" \
+            | grep -o '"id":[0-9]*' | head -1 | cut -d: -f2)
+          if [ -n "$DEPLOY_ID" ]; then
+            curl -sf -X POST "https://api.github.com/repos/${{ github.repository }}/deployments/$DEPLOY_ID/statuses" \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -d "{\"state\":\"success\",\"environment_url\":\"$SITE_URL\",\"environment\":\"production\"}"
+          fi
