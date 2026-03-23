@@ -16,13 +16,71 @@ const { title, description, pubDate, updatedDate, author, categories = [], tags 
 ---
 
 <BaseLayout title={title} description={description}>
-  <article>
-    {heroImage && <img src={heroImage} alt={title} style="width:100%;max-height:400px;object-fit:cover;border-radius:6px;margin-bottom:1.5rem;" />}
-    <h1 style="margin-top:0;">{title}</h1>
-    <p style="color:#666;font-size:0.9rem;">
-      {pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-      {author && <span> · {author}</span>}
-    </p>
-    <div class="content"><slot /></div>
+  <article class="blog-post">
+    {heroImage && <img src={heroImage} alt={title} class="hero-image" />}
+    <header class="post-header">
+      <h1 class="post-title">{title}</h1>
+      <div class="post-meta">
+        <time datetime={pubDate.toISOString()}>
+          {pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </time>
+        {author && <span class="post-author">by {author}</span>}
+        {updatedDate && (
+          <span class="post-updated">Updated {updatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        )}
+      </div>
+      {description && <p class="post-description">{description}</p>}
+    </header>
+    <div class="post-content"><slot /></div>
   </article>
 </BaseLayout>
+
+<style is:global>
+  .blog-post { max-width: 680px; }
+
+  .hero-image {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+
+  .post-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 2px solid #ede9e0; }
+
+  .post-title { font-size: 2.2rem; margin-top: 0; margin-bottom: 1rem; color: #1a1a2e; letter-spacing: -0.02em; }
+
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.88rem;
+    color: #888;
+  }
+
+  .post-meta time { font-weight: 500; color: #666; }
+  .post-author { color: #5b6af0; font-weight: 500; }
+  .post-author::before { content: '·'; margin-right: 1rem; color: #ccc; }
+  .post-updated { font-style: italic; }
+  .post-updated::before { content: '·'; margin-right: 1rem; color: #ccc; }
+
+  .post-description {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    color: #666;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .post-content { font-size: 1.05rem; }
+  .post-content h2 { font-size: 1.5rem; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid #ede9e0; }
+  .post-content h3 { font-size: 1.2rem; margin-top: 2rem; }
+  .post-content blockquote { border-left: 3px solid #5b6af0; padding: 0.75rem 1.25rem; margin: 1.5rem 0; background: #f4f4ff; border-radius: 0 6px 6px 0; color: #555; font-style: italic; }
+  .post-content pre { background: #1a1a2e; color: #e8e8f0; padding: 1.25rem 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0; }
+  .post-content code { background: #ede9e0; padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.88em; }
+  .post-content pre code { background: none; padding: 0; font-size: inherit; }
+</style>

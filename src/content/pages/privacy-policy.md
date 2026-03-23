@@ -1,7 +1,7 @@
 ---
 title: "Privacy Policy"
 description: "Who we are Suggested text: Our website address is: http://127.0.0.1:34717. Comments Suggested text: When visitors leave comments on the site we collect the data shown in the comments form, and also the visitor’s IP address and browser user agent string to help spam detection. An anonymized string created from your email address (also called a […]"
-updatedDate: "2026-03-22T22:38:54"
+updatedDate: "2026-03-23T05:44:05"
 menuOrder: 0
 draft: true
 ---

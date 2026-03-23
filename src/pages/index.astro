@@ -8,18 +8,131 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
 ---
 
 <BaseLayout title="Home">
-  <h1 style="margin-top:0;">Welcome</h1>
-  <h2>Recent Posts</h2>
-  {posts.length > 0 ? (
-    <ul>
-      {posts.map((post) => (
-        <li style="margin-bottom:1rem;">
-          <a href={`/blog/${post.id.replace(/\.md$/, '')}/`}>{post.data.title}</a>
-          <br /><small style="color:#666;">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</small>
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p>No posts yet. Open the editor and create your first post!</p>
-  )}
+  <section class="hero">
+    <h1 class="hero-title">Welcome to My Site</h1>
+    <p class="hero-subtitle">Thoughts, stories, and ideas — fresh from the editor.</p>
+    <a href="/blog/" class="hero-cta">Read the Blog &rarr;</a>
+  </section>
+
+  <section class="recent-posts">
+    <h2 class="section-heading">Recent Posts</h2>
+    {posts.length > 0 ? (
+      <div class="post-list">
+        {posts.map((post) => (
+          <a href={`/blog/${post.id.replace(/\.md$/, '')}/`} class="post-card">
+            <h3 class="post-card-title">{post.data.title}</h3>
+            {post.data.description && <p class="post-card-excerpt">{post.data.description}</p>}
+            <span class="post-card-date">{post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state">
+        <p>No posts yet. Open the editor and create your first post!</p>
+      </div>
+    )}
+  </section>
 </BaseLayout>
+
+<style>
+  .hero {
+    background: linear-gradient(135deg, #f0f0ff 0%, #faf0ff 100%);
+    border: 1px solid #e4e0f8;
+    border-radius: 16px;
+    padding: 3.5rem 3rem;
+    margin-bottom: 3.5rem;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 2.6rem;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #1a1a2e;
+    letter-spacing: -0.03em;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: #666;
+    margin-bottom: 1.75rem;
+    font-style: italic;
+  }
+
+  .hero-cta {
+    display: inline-block;
+    background: #5b6af0;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.65rem 1.5rem;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .hero-cta:hover { background: #3a4bdb; color: #fff; text-decoration-color: transparent; transform: translateY(-1px); }
+
+  .section-heading {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999;
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    font-weight: 600;
+  }
+
+  .post-list { display: flex; flex-direction: column; gap: 1rem; }
+
+  .post-card {
+    display: block;
+    background: #fff;
+    border: 1px solid #e8e4de;
+    border-radius: 10px;
+    padding: 1.4rem 1.6rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  }
+  .post-card:hover {
+    border-color: #5b6af0;
+    box-shadow: 0 4px 16px rgba(91, 106, 240, 0.1);
+    transform: translateY(-2px);
+    text-decoration-color: transparent;
+    color: inherit;
+  }
+
+  .post-card-title {
+    font-size: 1.15rem;
+    margin-top: 0;
+    margin-bottom: 0.4rem;
+    color: #1a1a2e;
+  }
+  .post-card:hover .post-card-title { color: #5b6af0; }
+
+  .post-card-excerpt {
+    font-size: 0.92rem;
+    color: #777;
+    margin-bottom: 0.75rem;
+    line-height: 1.55;
+    font-style: italic;
+  }
+
+  .post-card-date {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.8rem;
+    color: #aaa;
+    font-weight: 500;
+  }
+
+  .empty-state {
+    background: #fff;
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    padding: 2.5rem;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+  }
+</style>
