@@ -21,28 +21,15 @@ jobs:
       - run: npm run build
 
       - name: Create CF Pages project if needed
-        id: cf-project
         run: |
-          REPO_NAME="${{ github.event.repository.name }}"
-
-          # Try to create the project
-          curl -sf -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
+          curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{\"name\":\"$REPO_NAME\",\"production_branch\":\"main\"}" 2>/dev/null || true
-
-          # List all projects and find the one matching our repo name
-          # (CF may have appended a suffix like -60m)
-          PROJECTS=$(curl -sf "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" 2>/dev/null || true)
-          SUBDOMAIN=$(echo "$PROJECTS" | grep -o '"subdomain":"[^"]*"' | grep "$REPO_NAME" | head -1 | cut -d'"' -f4)
-
-          if [ -n "$SUBDOMAIN" ]; then
-            echo "site_url=https://$SUBDOMAIN" >> "$GITHUB_OUTPUT"
-            echo "Resolved site URL: https://$SUBDOMAIN"
-          fi
+            -d '{"name":"${{ github.event.repository.name }}","production_branch":"main"}' \
+            || true
 
       - name: Deploy to Cloudflare Pages
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -50,11 +37,16 @@ jobs:
           command: pages deploy dist --project-name=${{ github.event.repository.name }}
 
       - name: Save site URL as deployment
-        if: steps.cf-project.outputs.site_url
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SITE_URL: ${{ steps.cf-project.outputs.site_url }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
+          # Extract production URL from per-commit URL (e.g. abc123.my-site.pages.dev -> my-site.pages.dev)
+          SITE_URL=$(echo "$DEPLOY_URL" | sed 's|https://[a-f0-9]*\.||')
+          if [ -z "$SITE_URL" ]; then exit 0; fi
+          SITE_URL="https://$SITE_URL"
+          echo "Site URL: $SITE_URL"
+
           DEPLOY_ID=$(curl -sf -X POST "https://api.github.com/repos/${{ github.repository }}/deployments" \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
