@@ -23,21 +23,19 @@ jobs:
       - name: Create CF Pages project if needed
         id: cf-project
         run: |
-          # Try to create; if it already exists, just fetch it
-          RESULT=$(curl -sf -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
+          REPO_NAME="${{ github.event.repository.name }}"
+
+          # Try to create the project
+          curl -sf -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"name":"${{ github.event.repository.name }}","production_branch":"main"}' 2>/dev/null || true)
+            -d "{\"name\":\"$REPO_NAME\",\"production_branch\":\"main\"}" 2>/dev/null || true
 
-          # Extract subdomain from create response
-          SUBDOMAIN=$(echo "$RESULT" | grep -o '"subdomain":"[^"]*"' | head -1 | cut -d'"' -f4)
-
-          # If create didn't return a subdomain (project exists), fetch it
-          if [ -z "$SUBDOMAIN" ]; then
-            RESULT=$(curl -sf "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/${{ github.event.repository.name }}" \
-              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" 2>/dev/null || true)
-            SUBDOMAIN=$(echo "$RESULT" | grep -o '"subdomain":"[^"]*"' | head -1 | cut -d'"' -f4)
-          fi
+          # List all projects and find the one matching our repo name
+          # (CF may have appended a suffix like -60m)
+          PROJECTS=$(curl -sf "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" 2>/dev/null || true)
+          SUBDOMAIN=$(echo "$PROJECTS" | grep -o '"subdomain":"[^"]*"' | grep "$REPO_NAME" | head -1 | cut -d'"' -f4)
 
           if [ -n "$SUBDOMAIN" ]; then
             echo "site_url=https://$SUBDOMAIN" >> "$GITHUB_OUTPUT"
