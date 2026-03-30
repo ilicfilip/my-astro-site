@@ -18,8 +18,12 @@
         "href": "#"
       },
       {
-        "label": "Another custom link",
+        "label": "Emilia Capital",
         "href": "https://emilia.capital"
+      },
+      {
+        "label": "test cat",
+        "href": "/category/test-cat/"
       }
     ]
   }
