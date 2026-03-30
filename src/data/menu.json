@@ -1,0 +1,22 @@
+{
+  "locations": {
+    "primary": [
+      {
+        "label": "Home",
+        "href": "/scope:0.3815465161736376/"
+      },
+      {
+        "label": "A new page",
+        "href": "/scope:0.3815465161736376/a-new-page/"
+      },
+      {
+        "label": "Another new page",
+        "href": "/scope:0.3815465161736376/another-new-page/"
+      },
+      {
+        "label": "Custom link",
+        "href": "#"
+      }
+    ]
+  }
+}
