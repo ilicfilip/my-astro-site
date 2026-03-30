@@ -3,19 +3,23 @@
     "primary": [
       {
         "label": "Home",
-        "href": "/scope:0.6084895108816004/"
+        "href": "/"
       },
       {
         "label": "A new page",
-        "href": "/scope:0.6084895108816004/a-new-page/"
+        "href": "/a-new-page/"
       },
       {
         "label": "Another new page",
-        "href": "/scope:0.6084895108816004/another-new-page/"
+        "href": "/another-new-page/"
       },
       {
         "label": "Custom link",
         "href": "#"
+      },
+      {
+        "label": "Another custom link",
+        "href": "https://emilia.capital"
       }
     ]
   }
