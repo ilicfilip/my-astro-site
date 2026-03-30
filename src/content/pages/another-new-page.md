@@ -1,7 +1,7 @@
 ---
 title: "Another new page"
 description: "some content"
-updatedDate: "2026-03-30T07:50:35"
+updatedDate: "2026-03-30T11:48:27"
 menuOrder: 0
 draft: false
 ---
