@@ -3,7 +3,10 @@
     "primary": [
       {
         "label": "Home",
-        "href": "/"
+        "href": "/",
+        "classes": [
+          "custom-class"
+        ]
       },
       {
         "label": "A new page",
